@@ -5,4 +5,4 @@
 # hbbtn
 # hbbbtn
 
-puts ARGV[0].scan(/hb{2,3}tn/).join
+puts ARGV[0].scan(/hb?tn/).join
