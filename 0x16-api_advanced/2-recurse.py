@@ -1,36 +1,25 @@
 #!/usr/bin/python3
-"""
-2-recurse.py
-"""
+"""Script that returns top 10 hot posts of a subreddit"""
 import requests
+after = None
 
 
-def recurse(subreddit, hot_list=[], count=0, after=''):
-	"""
-	Function that queries the Reddit API and returns a list
-	containing the titles of all hot articles for a given subreddit.
-	"""
-	base = 'https://www.reddit.com/'
-	listings = 'r/{}/hot.json'.format(subreddit)
-	query_string = '?show="all"&limit=100&after={}&count={}'.format(
-        after, count)
-    	url = base + listings + query_string
-    	headers = {'User-Agent': 'Python/1.0(Holberton School 0x16 task 2)'}
-    	response = requests.get(url, headers=headers)
-    	if not response.ok:
-        	if len(hot_list) == 0:
-            		return None
-        	else:
-            		return hot_list
-	data = response.json()['data']
-    	for post in data['children']:
-		hot_list.append(post['data']['title'])
-	after = data['after']
-	dist = data['dist']
-	if (after):
-		recurse(subreddit, hot_list, count + dist, after)
-
-	if len(hot_list) == 0:
-		return None
-	else:
+def recurse(subreddit, hot_list=[]):
+	"""Recursive function that returns a list of top posts"""
+	global after
+	headers = {'User-Agent': 'selBot/2.1'}
+	URL = f'https://www.reddit.com/r/{subreddit}/hot.json'
+	params = {'after': after}
+	response = requests.get(URL, params=params, headers=headers,
+                            allow_redirects=False)
+	if response.status_code == 200:
+		after_data = response.json().get("data").get("after")
+		if after_data is not None:
+			after = after_data
+			recurse(subreddit, hot_list)
+		titles = response.json().get("data").get("children")
+		for title in titles:
+			hot_list.append(title.get("data").get("title"))
 		return hot_list
+	else:
+		return (None)
